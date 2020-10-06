@@ -1,0 +1,31 @@
+******************
+** SETUP PYTHON **
+******************
+
+Install python 3.8 or better.
+https://www.python.org/downloads/release/python-386/
+https://www.ics.uci.edu/~pattis/common/handouts/pythoneclipsejava/python.html
+
+Open a command line and run the following: python --version
+You should see something like this:
+
+C:\Users\Ben McGuffog>python --version
+Python 3.8.6
+
+C:\Users\Ben McGuffog>
+
+If you get an error, or you see python version 2 installed then follow these instructions:
+https://geek-university.com/python/add-python-to-the-windows-path/
+
+
+******************
+**  RUN IP-MAN  **
+******************
+Once python is installed, just copy ASDOMan.py into a safe folder. ASDOMan.py will create a logs folder in the
+folder that it is executed. If a folder already exists, ASDOMan will overwrite it. So use it at your own risk.
+
+Set you static IP address to:
+IP:   10.128.33.10
+MASK: 255.224.0.0
+
+Connect to the T2 port on the trainswitch and double click on ASDOMan.py. Let ASDOMan run to completion.

@@ -167,7 +167,7 @@ class IPMan:
             with SCPClient(client.get_transport(), sanitize=lambda x: x) as scp:
                 scp.get('/var/opt/logs/ASDO*', path)
             scp.close()
-        except:
+        except TimeoutError:
             print("Failed connection to " + str(coach))
 
     # Accepts a list as 'coaches' and pings each item in the list.

@@ -2,21 +2,28 @@
 ** SETUP PYTHON **
 ******************
 
-Install python 3.8 or better.
+Install python 3.8 or better. If you don't have a local copy, go here:
 https://www.python.org/downloads/release/python-386/
+
+Installation instructions are here:
 https://www.ics.uci.edu/~pattis/common/handouts/pythoneclipsejava/python.html
 
-Open a command line and run the following: python --version
+When you're complete, check its working. Open a command line and run the following: python --version
 You should see something like this:
 
 C:\Users\Ben McGuffog>python --version
 Python 3.8.6
 
-C:\Users\Ben McGuffog>
-
 If you get an error, or you see python version 2 installed then follow these instructions:
 https://geek-university.com/python/add-python-to-the-windows-path/
 
+
+************************
+** SETUP DEPENDENCIES **
+************************
+Open a command prompt. Type the following command in order to install the Python dependencies:
+
+pip install paramiko pythonping scp
 
 ******************
 **  RUN IP-MAN  **

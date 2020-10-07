@@ -12,6 +12,8 @@ coachList = []
 Class IPMan is our ancient hero who downloads the ASDO logs for the list of coaches sent to it. 
 Using mad python Kung Fu style object programming, together we can overcome the horror that is ASDO!
 
+Author: Ben McGuffog, Technical Engineer
+
 """
 
 
@@ -202,7 +204,9 @@ class IPMan:
     def makeCoachList(self, coachList):
         coachList.clear()
         for coach in self.cpsdict.keys():
+            print('***************************')
             print('********** ' + coach + ' **********')
+            print('***************************')
             if self.isCoachReachable(self.getCPS(coach)):
                 coachList.append(coach)
 
@@ -229,7 +233,8 @@ print("""
         ░░█████████▄▄▄▄███████░░░░░░░░░░
         ░░███████░░░░░░████████░░░░░░░░░
         ░░▀▀█████░░░░░░░▀▀████▀░░░░░░░░░
-             ASDO Man Version 1.0
+            ASDO Man Version 1.0 
+    Author: Ben McGuffog, Technical Engineer
              
 """)
 

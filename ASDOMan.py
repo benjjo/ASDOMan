@@ -97,6 +97,7 @@ class IPMan:
             "15338": "10.128.167.21",
             "15339": "10.128.168.21",
             "15340": "10.128.169.21",
+            # "Home": "127.0.0.1"
         }
 
         self.cpgdict = {
@@ -121,6 +122,7 @@ class IPMan:
             "15108": "10.128.72.2",
             "15109": "10.128.73.2",
             "15110": "10.128.74.2",
+            # "Home": "127.0.0.1"
         }
 
     # Returns the CPG dictionary item for the argument coach.
@@ -129,9 +131,6 @@ class IPMan:
     def getCPG(self, coach):
         if type(coach) is int:
             coach = str(coach)
-
-        if self.cpgdict.get(coach) is None:
-            coach = 'Home'
 
         return self.cpgdict.get(coach)
 
@@ -142,8 +141,6 @@ class IPMan:
         if type(coach) is int:
             coach = str(coach)
 
-        if self.cpsdict.get(coach) is None:
-            coach = 'Home'
         return self.cpsdict.get(coach)
 
     # Automatically downloads the log files from the remote /var/opt/logs folder.
@@ -159,7 +156,6 @@ class IPMan:
         client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         try:
             client.connect(host, port, username, password)
-            client.exec_command('ls')
             self.makeLogDir(coach)
             # This is a little bit of a hack. SCPClient doesn't allow you to pass a wild
             # character to the string, it just sees it as a literal character.
@@ -167,7 +163,7 @@ class IPMan:
             with SCPClient(client.get_transport(), sanitize=lambda x: x) as scp:
                 scp.get('/var/opt/logs/ASDO*', path)
             scp.close()
-        except TimeoutError:
+        except: #need to work out what kind of except error goes here. paramiko.ssh_exception.NoValidConnectionsError
             print("Failed connection to " + str(coach))
 
     # Accepts a list as 'coaches' and pings each item in the list.
@@ -210,7 +206,9 @@ class IPMan:
             print('***************************')
             if self.isCoachReachable(self.getCPS(coach)):
                 coachList.append(coach)
-
+                f = open("ASDOMan_logfile.txt", "a")
+                f.write("Downloaded: " + str(coach) + " at: " + str(self.getCPS(coach)) + "\n")
+                f.close()
 
 def main():
     getRakeLogs = IPMan()

@@ -209,11 +209,11 @@ class IPMan:
             print('***************************')
             if self.isCoachReachable(self.getCPS(coach)):
                 coaches.append(coach)
-                self.writeToLogfile("Downloaded: " + str(coach) + " at: " + str(self.getCPS(coach)) + "\n")
+                IPMan.writeToLogfile("Downloaded: " + str(coach) + " at: " + str(self.getCPS(coach)) + "\n")
 
     # Writes to a logfile named ASDOMan_logfile.txt.
     @staticmethod
-    def writeToLogfile(logString):
+    def writeToLogfile(logString) -> str:
         f = open("ASDOMan_logfile.txt", "a")
         f.write(logString)
         f.close()

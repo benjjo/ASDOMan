@@ -213,7 +213,7 @@ class IPMan:
 
     # Writes to a logfile named ASDOMan_logfile.txt.
     @staticmethod
-    def writeToLogfile(logString) -> str:
+    def writeToLogfile(logString):
         f = open("ASDOMan_logfile.txt", "a")
         f.write(logString)
         f.close()

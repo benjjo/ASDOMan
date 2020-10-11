@@ -163,8 +163,9 @@ class IPMan:
             with SCPClient(client.get_transport(), sanitize=lambda x: x) as scp:
                 scp.get('/var/opt/logs/ASDO*', path)
             scp.close()
-        except: #need to work out what kind of except error goes here. paramiko.ssh_exception.NoValidConnectionsError
+        except paramiko.ssh_exception.NoValidConnectionsError:
             print("Failed connection to " + str(coach))
+            IPMan.writeToLogfile("Failed connection to " + str(coach))
 
     # Accepts a list as 'coaches' and pings each item in the list.
     def pingAttack(self, coaches):
@@ -181,14 +182,16 @@ class IPMan:
             os.makedirs(path, exist_ok=True)
         except OSError:
             print('Creation of the directory %s has failed' % path)
+            IPMan.writeToLogfile('Creation of the directory %s has failed' % path)
             # return False
         else:
             print('Successfully uploaded logs to %s ' % path)
+            IPMan.writeToLogfile('Successfully uploaded logs to %s ' % path)
             # return True
 
     # Grabs the logs for an entire coach rake by iterating through a list of coaches.
-    def getRake(self, coachList):
-        for coach in coachList:
+    def getRake(self, coaches):
+        for coach in coaches:
             self.getLogs(coach)
 
     # Returns true if coach is currently reachable.
@@ -198,17 +201,23 @@ class IPMan:
         return response
 
     # Creates a list of coaches from the CPS list that are currently reachable.
-    def makeCoachList(self, coachList):
-        coachList.clear()
+    def makeCoachList(self, coaches):
+        coaches.clear()
         for coach in self.cpsdict.keys():
             print('***************************')
             print('********** ' + coach + ' **********')
             print('***************************')
             if self.isCoachReachable(self.getCPS(coach)):
-                coachList.append(coach)
-                f = open("ASDOMan_logfile.txt", "a")
-                f.write("Downloaded: " + str(coach) + " at: " + str(self.getCPS(coach)) + "\n")
-                f.close()
+                coaches.append(coach)
+                self.writeToLogfile("Downloaded: " + str(coach) + " at: " + str(self.getCPS(coach)) + "\n")
+
+    # Writes to a logfile named ASDOMan_logfile.txt.
+    @staticmethod
+    def writeToLogfile(logString):
+        f = open("ASDOMan_logfile.txt", "a")
+        f.write(logString)
+        f.close()
+
 
 def main():
     getRakeLogs = IPMan()
@@ -233,7 +242,7 @@ def main():
             ░░█████████▄▄▄▄███████░░░░░░░░░░
             ░░███████░░░░░░████████░░░░░░░░░
             ░░▀▀█████░░░░░░░▀▀████▀░░░░░░░░░
-            ASDO Man Version 1.1 Panda distro 
+            ASDO Man Version 1.2 Panda distro 
         Author: Ben McGuffog, Technical Engineer
 
     """)

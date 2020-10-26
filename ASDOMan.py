@@ -254,9 +254,9 @@ class IPMan:
 
 def main():
     """
-    Instantiates a class object or type IPMan and makes a list of ping-able coaches.
-    Using this list, each item is then sent an SCP protocol to download the logs from the
-    /var/opt/logs folder and save them to a local area.
+    Instantiates a class object of type IPMan and makes a list of ping-able coaches.
+    Using this list, each coach is then sent an SCP protocol to download the logs from the
+    root@COACH_IP_ADDRESS:/var/opt/logs folder and save them to the local machine.
     :return:
     """
     getRakeLogs = IPMan()

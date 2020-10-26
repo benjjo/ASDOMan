@@ -4,6 +4,7 @@ from scp import SCPClient
 from pythonping import ping
 import os
 import time
+import datetime
 
 path = ''
 coachList = []
@@ -216,13 +217,19 @@ class IPMan:
             self.getLogs(coach)
 
     @staticmethod
-    def isCoachReachable(coachIP):
+    def isCoachReachable(coachNumber, coachIP):
         """
         Returns true if coach is currently reachable.
+        :param coachNumber:
         :param coachIP:
         :return boolean:
         """
         response = not os.system('ping -n 1 -w 100 ' + str(coachIP))
+        if response:
+            IPMan.writeToLogfile(str(coachNumber) + " contact confirmed at " + str(coachIP))
+        else:
+            IPMan.writeToLogfile(str(coachNumber) + " unreachable at " + str(coachIP))
+
         return response
 
     def makeCoachList(self, coaches):
@@ -236,9 +243,9 @@ class IPMan:
             print('***************************')
             print('********** ' + coach + ' **********')
             print('***************************')
-            if self.isCoachReachable(self.getCPS(coach)):
+            if self.isCoachReachable(coach, self.getCPS(coach)):
                 coaches.append(coach)
-                IPMan.writeToLogfile("Downloaded: " + str(coach) + " at: " + str(self.getCPS(coach)) + "\n")
+                IPMan.writeToLogfile("Downloaded: " + str(coach) + " at: " + str(self.getCPS(coach)))
 
     @staticmethod
     def writeToLogfile(logString):
@@ -248,7 +255,7 @@ class IPMan:
         :return none:
         """
         f = open("ASDOMan_logfile.txt", "a")
-        f.write(logString)
+        f.write(str(datetime.datetime.utcnow().strftime("%H:%M:%S.%f")[:-4]) + " " + logString + "\n")
         f.close()
 
 
@@ -261,32 +268,58 @@ def main():
     """
     getRakeLogs = IPMan()
     getRakeLogs.makeCoachList(coachList)
-    getRakeLogs.getRake(coachList)
-    print("""
+    if coachList:
+        getRakeLogs.getRake(coachList)
+        print("""
+    
+                ░░░░░░░░██░▀▀▀▀▄██▄░░░░░░░░░░░░░
+                ██▄░░░░░█░░░░░░▀▀▀▄░░░░░░░░░░░░░
+                ░█▀▄▄░░█▀▄░░▄░░░░░█░░░░░░░░▄▄▄██
+                ░█▄▄▄▀█▀█▀░▀██░░░█▄█▄░░░▄█████▀▀
+                ▀█▄████▄░▄▄░░░░▄▄████████████▀░░
+                ░▀██████▄▄▄▄▄██████████████▄█░░░
+                ░░░▀█████████████████████▀▀░░░░░
+                ░░░░░▀▀██████████████▀▀░░░░░░░░░
+                ░░░░░░░█▀▀▀▀▀░░▀░░░▀█░░░░░░░░░░░
+                ░░░░░░█░░░░░░░░░░░░░░█░░░░░░░░░░
+                ░░░░░█░░░░░░░░░░░░░░░█░░░░░░░░░░
+                ░░░░░█░░░░░░░░░░░░░░░█░░░░░░░░░░
+                ░░░▄████▄▄░░░░░░░░░░██░░░░░░░░░░
+                ░░▄████████░░░░░░░▄███░░░░░░░░░░
+                ░░█████████▄▄▄▄███████░░░░░░░░░░
+                ░░███████░░░░░░████████░░░░░░░░░
+                ░░▀▀█████░░░░░░░▀▀████▀░░░░░░░░░
+                ASDO Man Version 1.3 Panda distro 
+            Author: Ben McGuffog, Technical Engineer
+    
+        """)
 
-            ░░░░░░░░██░▀▀▀▀▄██▄░░░░░░░░░░░░░
-            ██▄░░░░░█░░░░░░▀▀▀▄░░░░░░░░░░░░░
-            ░█▀▄▄░░█▀▄░░▄░░░░░█░░░░░░░░▄▄▄██
-            ░█▄▄▄▀█▀█▀░▀██░░░█▄█▄░░░▄█████▀▀
-            ▀█▄████▄░▄▄░░░░▄▄████████████▀░░
-            ░▀██████▄▄▄▄▄██████████████▄█░░░
-            ░░░▀█████████████████████▀▀░░░░░
-            ░░░░░▀▀██████████████▀▀░░░░░░░░░
-            ░░░░░░░█▀▀▀▀▀░░▀░░░▀█░░░░░░░░░░░
-            ░░░░░░█░░░░░░░░░░░░░░█░░░░░░░░░░
-            ░░░░░█░░░░░░░░░░░░░░░█░░░░░░░░░░
-            ░░░░░█░░░░░░░░░░░░░░░█░░░░░░░░░░
-            ░░░▄████▄▄░░░░░░░░░░██░░░░░░░░░░
-            ░░▄████████░░░░░░░▄███░░░░░░░░░░
-            ░░█████████▄▄▄▄███████░░░░░░░░░░
-            ░░███████░░░░░░████████░░░░░░░░░
-            ░░▀▀█████░░░░░░░▀▀████▀░░░░░░░░░
-            ASDO Man Version 1.2a Panda distro 
-        Author: Ben McGuffog, Technical Engineer
-
-    """)
-
-    print('****** Logs gathered for: ' + str(coachList))
+        print('****** Logs gathered for: ' + str(coachList))
+    else:
+        print("""
+                                      _.---**""**-.       
+                              ._   .-'           /|`.     
+                               \`.'             / |  `.   
+                                V              (  ;    \  
+                                L       _.-  -. `'      \ 
+                               / `-. _.'       \         ;
+                              :            __   ;    _   |
+                              :`-.___.+-*"': `  ;  .' `. |
+                               |`-/     `--*'   /  /  /`.\|
+                              : :              \    :`.| ;
+                              | |   .           ;/ .' ' / 
+                              : :  / `             :__.'  
+                               \`._.-'       /     |      
+                                : )         :      ;      
+                                :----.._    |     /       
+                               : .-.    `.       /        
+                                \     `._       /         
+                                /`-            /          
+                               :             .'           
+                                \ )       .-'             
+                                 `-----*"'     
+                        SOMETHING WENT TERRIBLY WRONG
+        """)
 
     time.sleep(5)
 

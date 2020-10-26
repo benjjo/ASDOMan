@@ -123,27 +123,39 @@ class IPMan:
             "15110": "10.128.74.2",
         }
 
-    # Returns the CPG dictionary item for the argument coach.
-    # Will default to home 127.0.0.1 for case None.
-    # Will cast int arguments to strings.
     def getCPG(self, coach):
+        """
+        Returns the CPG dictionary item for the argument coach.
+        Will default to home 127.0.0.1 for case None.
+        Will cast int arguments to strings.
+        :param coach:
+        :return self.cpgdict.get(coach):
+        """
         if type(coach) is int:
             coach = str(coach)
 
         return self.cpgdict.get(coach)
 
-    # Returns the CPS dictionary item for the argument coach.
-    # Will default to home 127.0.0.1 for case None.
-    # Will cast int arguments to strings.
     def getCPS(self, coach):
+        """
+        Returns the CPS dictionary item for the argument coach.
+        Will default to home 127.0.0.1 for case None.
+        Will cast int arguments to strings.
+        :param coach:
+        :return self.cpsdict.get(coach):
+        """
         if type(coach) is int:
             coach = str(coach)
 
         return self.cpsdict.get(coach)
 
-    # Automatically downloads the log files from the remote /var/opt/logs folder.
-    # Utilises the ssh port 22 protocols.
     def getLogs(self, coach):
+        """
+        Automatically downloads the log files from the remote /var/opt/logs folder.
+        Utilises the ssh port 22 protocols.
+        :param coach:
+        :return none:
+        """
         global path
         username = 'root'
         password = 'root'
@@ -165,15 +177,23 @@ class IPMan:
             print("Failed connection to " + str(coach))
             IPMan.writeToLogfile("Failed connection to " + str(coach))
 
-    # Accepts a list as 'coaches' and pings each item in the list.
     def pingAttack(self, coaches):
+        """
+        Accepts a list as 'coaches' and pings each item in the list.
+        :param coaches:
+        :return none:
+        """
         for c in coaches:
             print(c + ":\n" + str(ping(self.getCPS(c))))
 
-    # Attempts to make a directory for the current download session.
-    # Returns the new folder as a string is successful, else returns None.
     @staticmethod
     def makeLogDir(coach):
+        """
+        Attempts to make a directory for the current download session.
+        Returns the new folder as a string is successful, else returns None.
+        :param coach:
+        :return none:
+        """
         global path
         path = 'logs/' + str(coach) + '/' + str(time.strftime('%Y%m%d', time.localtime()))
         try:
@@ -185,21 +205,32 @@ class IPMan:
         else:
             print('Successfully uploaded logs to %s ' % path)
             IPMan.writeToLogfile('Successfully uploaded logs to %s ' % path)
-            # return True
 
-    # Grabs the logs for an entire coach rake by iterating through a list of coaches.
     def getRake(self, coaches):
+        """
+        Grabs the logs for an entire coach rake by iterating through a list of coaches.
+        :param coaches:
+        :return none:
+        """
         for coach in coaches:
             self.getLogs(coach)
 
-    # Returns true if coach is currently reachable.
     @staticmethod
     def isCoachReachable(coachIP):
+        """
+        Returns true if coach is currently reachable.
+        :param coachIP:
+        :return boolean:
+        """
         response = not os.system('ping -n 1 -w 100 ' + str(coachIP))
         return response
 
-    # Creates a list of coaches from the CPS list that are currently reachable.
     def makeCoachList(self, coaches):
+        """
+        Creates a list of coaches from the CPS list that are currently reachable.
+        :param coaches:
+        :return none:
+        """
         coaches.clear()
         for coach in self.cpsdict.keys():
             print('***************************')
@@ -209,15 +240,25 @@ class IPMan:
                 coaches.append(coach)
                 IPMan.writeToLogfile("Downloaded: " + str(coach) + " at: " + str(self.getCPS(coach)) + "\n")
 
-    # Writes to a logfile named ASDOMan_logfile.txt.
     @staticmethod
     def writeToLogfile(logString):
+        """
+        Writes to a logfile named ASDOMan_logfile.txt.
+        :param logString:
+        :return none:
+        """
         f = open("ASDOMan_logfile.txt", "a")
         f.write(logString)
         f.close()
 
 
 def main():
+    """
+    Instantiates a class object or type IPMan and makes a list of ping-able coaches.
+    Using this list, each item is then sent an SCP protocol to download the logs from the
+    /var/opt/logs folder and save them to a local area.
+    :return:
+    """
     getRakeLogs = IPMan()
     getRakeLogs.makeCoachList(coachList)
     getRakeLogs.getRake(coachList)
@@ -240,7 +281,7 @@ def main():
             ░░█████████▄▄▄▄███████░░░░░░░░░░
             ░░███████░░░░░░████████░░░░░░░░░
             ░░▀▀█████░░░░░░░▀▀████▀░░░░░░░░░
-            ASDO Man Version 1.2 Panda distro 
+            ASDO Man Version 1.2a Panda distro 
         Author: Ben McGuffog, Technical Engineer
 
     """)

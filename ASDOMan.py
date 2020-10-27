@@ -317,7 +317,7 @@ def main():
          ARE YOU EVEN CONNECTED    :`-.___.+-*"': `  ;  .' `. |
               TO THE TRAIN?       |`-/     `--*'   /  /  /`.\|
                          \        : :              \    :`.| ;
-                           \      | |   .           ;/ .' ' / 
+                          \       | |   .           ;/ .' ' / 
                                   : :  / `             :__.'  
                                    \`._.-'       /     |      
                                     : )         :      ;      
@@ -331,7 +331,7 @@ def main():
 
         """)
 
-    input("Press any key to exit.")
+    input("Press any key to exit")
 
 
 if __name__ == "__main__":

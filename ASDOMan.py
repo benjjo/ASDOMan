@@ -1,5 +1,4 @@
 import sys
-
 import paramiko
 from paramiko import SSHClient
 from scp import SCPClient
@@ -11,17 +10,15 @@ import datetime
 path = ''
 coachList = []
 
-"""
-Class IPMan is our ancient hero who downloads the ASDO logs for the list of coaches sent to it. 
-Using mad python Kung Fu style object programming, together we can overcome the horror that is ASDO!
-
-Author:     Ben McGuffog, Technical Engineer
-Version:    2020-Oct
-
-"""
-
-
 class IPMan:
+    """
+    Class IPMan is our ancient hero who downloads the ASDO logs for the list of coaches sent to it.
+    Using mad python Kung Fu style object programming, together we can overcome the horror that is ASDO!
+
+    Author:     Ben McGuffog, Technical Engineer
+    Version:    2020-Oct
+
+    """
 
     def __init__(self):
         self.cpsdict = {
@@ -189,6 +186,30 @@ class IPMan:
         for c in coaches:
             print(c + ":\n" + str(ping(self.getCPS(c))))
 
+    def getRake(self, coaches):
+        """
+        Grabs the logs for an entire coach rake by iterating through a list of coaches.
+        :param coaches:
+        :return none:
+        """
+        for coach in coaches:
+            self.getLogs(coach)
+
+    def makeCoachList(self, coaches):
+        """
+        Creates a list of coaches from the CPS list that are currently reachable.
+        :param coaches:
+        :return none:
+        """
+        coaches.clear()
+        for coach in self.cpsdict.keys():
+            print('***************************')
+            print('********** ' + coach + ' **********')
+            print('***************************')
+            if self.isCoachReachable(coach, self.getCPS(coach)):
+                coaches.append(coach)
+                IPMan.writeToLogfile("Downloaded: " + str(coach) + " at: " + str(self.getCPS(coach)))
+
     @staticmethod
     def makeLogDir(coach):
         """
@@ -209,15 +230,6 @@ class IPMan:
             print('Successfully uploaded logs to %s ' % path)
             IPMan.writeToLogfile('Successfully uploaded logs to %s ' % path)
 
-    def getRake(self, coaches):
-        """
-        Grabs the logs for an entire coach rake by iterating through a list of coaches.
-        :param coaches:
-        :return none:
-        """
-        for coach in coaches:
-            self.getLogs(coach)
-
     @staticmethod
     def isCoachReachable(coachNumber, coachIP):
         """
@@ -234,21 +246,6 @@ class IPMan:
 
         return response
 
-    def makeCoachList(self, coaches):
-        """
-        Creates a list of coaches from the CPS list that are currently reachable.
-        :param coaches:
-        :return none:
-        """
-        coaches.clear()
-        for coach in self.cpsdict.keys():
-            print('***************************')
-            print('********** ' + coach + ' **********')
-            print('***************************')
-            if self.isCoachReachable(coach, self.getCPS(coach)):
-                coaches.append(coach)
-                IPMan.writeToLogfile("Downloaded: " + str(coach) + " at: " + str(self.getCPS(coach)))
-
     @staticmethod
     def writeToLogfile(logString):
         """
@@ -261,8 +258,14 @@ class IPMan:
         f.close()
 
     @staticmethod
-    # Define progress callback that prints the current percentage completed for the file
     def progress(filename, size, sent):
+        """
+        Define progress callback that prints the current percentage completed for the file
+        :param filename:
+        :param size:
+        :param sent:
+        :return none:
+        """
         sys.stdout.write("%s\'s progress: %.2f%%   \r" % (filename, float(sent) / float(size) * 100))
 
 
@@ -296,7 +299,7 @@ def main():
                 ░░█████████▄▄▄▄███████░░░░░░░░░░
                 ░░███████░░░░░░████████░░░░░░░░░
                 ░░▀▀█████░░░░░░░▀▀████▀░░░░░░░░░
-                ASDO Man Version 2.0 Panda Distro 
+               ASDO Man Version 2.0a Panda Distro 
             Author: Ben McGuffog, Technical Engineer
     
         """)

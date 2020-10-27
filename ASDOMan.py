@@ -1,3 +1,5 @@
+import sys
+
 import paramiko
 from paramiko import SSHClient
 from scp import SCPClient
@@ -171,7 +173,7 @@ class IPMan:
             # This is a little bit of a hack. SCPClient doesn't allow you to pass a wild
             # character to the string, it just sees it as a literal character.
             # Sanitize gets around this with lambda magic.
-            with SCPClient(client.get_transport(), sanitize=lambda x: x) as scp:
+            with SCPClient(client.get_transport(), sanitize=lambda x: x, progress=IPMan.progress) as scp:
                 scp.get('/var/opt/logs/ASDO*', path)
             scp.close()
         except paramiko.ssh_exception.NoValidConnectionsError:
@@ -255,8 +257,13 @@ class IPMan:
         :return none:
         """
         f = open("ASDOMan_logfile.txt", "a")
-        f.write(str(datetime.datetime.utcnow().strftime("%H:%M:%S.%f")[:-4]) + " " + logString + "\n")
+        f.write(str(datetime.datetime.utcnow().strftime("%b%d-%H:%M:%S.%f")[:-4]) + " " + logString + "\n")
         f.close()
+
+    @staticmethod
+    # Define progress callback that prints the current percentage completed for the file
+    def progress(filename, size, sent):
+        sys.stdout.write("%s\'s progress: %.2f%%   \r" % (filename, float(sent) / float(size) * 100))
 
 
 def main():
@@ -289,7 +296,7 @@ def main():
                 ░░█████████▄▄▄▄███████░░░░░░░░░░
                 ░░███████░░░░░░████████░░░░░░░░░
                 ░░▀▀█████░░░░░░░▀▀████▀░░░░░░░░░
-                ASDO Man Version 1.3 Panda distro 
+                ASDO Man Version 2.0 Panda Distro 
             Author: Ben McGuffog, Technical Engineer
     
         """)

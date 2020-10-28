@@ -299,7 +299,7 @@ def main():
                 ░░█████████▄▄▄▄███████░░░░░░░░░░
                 ░░███████░░░░░░████████░░░░░░░░░
                 ░░▀▀█████░░░░░░░▀▀████▀░░░░░░░░░
-               ASDO Man Version 2.0a Panda Distro 
+               ASDO Man Version 2.0b Panda Distro 
             Author: Ben McGuffog, Technical Engineer
     
         """)

@@ -313,7 +313,7 @@ def main():
                                     V              (  ;    \  
                                     L       _.-  -. `'      \ 
                                    / `-. _.'       \         ;
-                                  :            __   ;    _   |
+        YOU HAVE ANGERED ASDO MAN :            __   ;    _   |
          ARE YOU EVEN CONNECTED    :`-.___.+-*"': `  ;  .' `. |
               TO THE TRAIN?       |`-/     `--*'   /  /  /`.\|
                          \        : :              \    :`.| ;
@@ -328,7 +328,10 @@ def main():
                                    :             .'           
                                     \ )       .-'             
                                      `-----*"'     
-
+                                     
+        Try connecting to T2 on the Train Switch or directly to the CPS.
+        Try setting your IP address to 10.128.33.10, MASK: 255.224.0.0
+        Try setting your IP address to automatic.
         """)
 
     input("Press any key to exit")

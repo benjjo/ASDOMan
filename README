@@ -21,9 +21,8 @@ https://geek-university.com/python/add-python-to-the-windows-path/
 ************************
 ** SETUP DEPENDENCIES **
 ************************
-Open a command prompt. Type the following command in order to install the Python dependencies:
-
-pip install paramiko pythonping scp
+Open a command prompt. Type the following command in order to install the Python dependencies (note pythonping depreciated).
+pip install paramiko scp
 
 ******************
 **  RUN IP-MAN  **

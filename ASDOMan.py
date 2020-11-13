@@ -262,7 +262,7 @@ def main():
             Author: Ben McGuffog, Technical Engineer
 
         """)
-        print('****** Logs gathered for: ' + str(coachList))
+        print('****** Logs gathered for: ' + ', '.join(coachList))
     else:
         print("""
         

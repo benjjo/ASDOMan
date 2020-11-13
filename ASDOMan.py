@@ -5,6 +5,8 @@ from scp import SCPClient
 import os
 import time
 import datetime
+from tqdm import tqdm
+import subprocess
 
 path = ''
 coachList = []
@@ -138,14 +140,26 @@ class IPMan:
         :return none:
         """
         coaches.clear()
-        for coach in self.cpsdict.keys():
-            print('***************************')
-            print('********** ' + coach + ' **********')
-            print('***************************')
+        print("""
+     ____                      _     _                __
+    / ___|  ___  __ _ _ __ ___| |__ (_)_ __   __ _   / _| ___  _ __
+    \___ \ / _ \/ _` | '__/ __| '_ \| | '_ \ / _` | | |_ / _ \| '__|
+     ___) |  __/ (_| | | | (__| | | | | | | | (_| | |  _| (_) | |
+    |____/ \___|\__,_|_|  \___|_| |_|_|_| |_|\__, | |_|  \___/|_|
+                                             |___/
+     _             _
+    | |_ _ __ __ _(_)_ __  ___
+    | __| '__/ _` | | '_ \/ __|
+    | |_| | | (_| | | | | \__ \\
+     \__|_|  \__,_|_|_| |_|___/
+     
+     
+        """)
+        for coach in tqdm(self.cpsdict.keys()):
             if self.isCoachReachable(coach, self.getCPS(coach)):
                 coaches.append(coach)
                 IPMan.writeToLogfile("Downloaded: " + str(coach) + " at: " + str(self.getCPS(coach)))
-
+    
     @staticmethod
     def makeLogDir(coach):
         """
@@ -161,7 +175,6 @@ class IPMan:
         except OSError:
             print('Creation of the directory %s has failed' % path)
             IPMan.writeToLogfile('Creation of the directory %s has failed' % path)
-            # return False
         else:
             print('Successfully uploaded logs to %s ' % path)
             IPMan.writeToLogfile('Successfully uploaded logs to %s ' % path)
@@ -174,12 +187,11 @@ class IPMan:
         :param coachIP:
         :return boolean:
         """
-        response = not os.system('ping -n 1 -w 100 ' + str(coachIP))
+        response = not subprocess.call('ping -n 1 -w 100 ' + str(coachIP), stdout=subprocess.PIPE)
         if response:
             IPMan.writeToLogfile(str(coachNumber) + " contact confirmed at " + str(coachIP))
         else:
             IPMan.writeToLogfile(str(coachNumber) + " unreachable at " + str(coachIP))
-
         return response
 
     @staticmethod
@@ -212,11 +224,18 @@ def main():
     root@COACH_IP_ADDRESS:/var/opt/logs folder and save them to the local machine.
     :return:
     """
+    global coachList
     getRakeLogs = IPMan()
     getRakeLogs.makeCoachList(coachList)
     if coachList:
         getRakeLogs.getRake(coachList)
         print("""
+        
+        
+        
+        
+        
+        
     
                 ░░░░░░░░██░▀▀▀▀▄██▄░░░░░░░░░░░░░
                 ██▄░░░░░█░░░░░░▀▀▀▄░░░░░░░░░░░░░
@@ -235,14 +254,18 @@ def main():
                 ░░█████████▄▄▄▄███████░░░░░░░░░░
                 ░░███████░░░░░░████████░░░░░░░░░
                 ░░▀▀█████░░░░░░░▀▀████▀░░░░░░░░░
-               ASDO Man Version 2.0c Panda Distro 
+               ASDO Man Version 2.1 Panda Distro 
             Author: Ben McGuffog, Technical Engineer
-    
-        """)
 
+        """)
         print('****** Logs gathered for: ' + str(coachList))
     else:
         print("""
+        
+        
+        
+        
+        
                                           _.---**""**-.       
                                   ._   .-'           /|`.     
                                    \`.'             / |  `.   

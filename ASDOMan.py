@@ -7,6 +7,7 @@ import time
 import datetime
 from tqdm import tqdm
 import subprocess
+import gzip
 
 path = ''
 coachList = []
@@ -55,6 +56,8 @@ class IPMan:
             "15334": "10.128.163.21", "15335": "10.128.164.21", "15336": "10.128.165.21",
             "15337": "10.128.166.21", "15338": "10.128.167.21", "15339": "10.128.168.21",
             "15340": "10.128.169.21",
+            # TEST
+            # "pi": "172.24.22.246",
         }
 
         self.cpgdict = {
@@ -124,6 +127,17 @@ class IPMan:
             print("Failed connection to " + str(coach))
             IPMan.writeToLogfile("Failed connection to " + str(coach))
 
+        # Filter out the error logs by calling lineFilter
+        try:
+            for logFile in os.listdir(path):
+                if logFile.endswith('gz'):
+                    self.lineFilter(logFile, True)
+                else:
+                    self.lineFilter(logFile, False)
+        except Exception:
+            print("something went terribly wrong")
+            pass
+
     def getRake(self, coaches):
         """
         Grabs the logs for an entire coach rake by iterating through a list of coaches.
@@ -155,6 +169,26 @@ class IPMan:
             if self.isCoachReachable(coach, self.getCPS(coach)):
                 coaches.append(coach)
                 IPMan.writeToLogfile("Downloaded: " + str(coach) + " at: " + str(self.getCPS(coach)))
+
+    def lineFilter(self, file, compressed):
+        """
+        Grabs a file and depending on whether or not its gzipped, will filter through
+        and pullout all of the PTI and error lines.
+        """
+        fileLocation = (path + '/' + file)
+        errorLog = (path + '/' + 'filtered_log.txt')
+        logfile = open(errorLog, 'a')
+        if compressed:
+            with gzip.open(fileLocation, 'rt') as log:
+                for line in log:
+                    if 'error' in line or 'PTI' in line:
+                        logfile.write(line)
+        else:
+            with open(fileLocation, 'rt') as log:
+                for line in log:
+                    if 'error' in line or 'PTI' in line:
+                        logfile.write(line)
+        logfile.close()
     
     @staticmethod
     def makeLogDir(coach):
@@ -251,7 +285,7 @@ def main():
                 ░░█████████▄▄▄▄███████░░░░░░░░░░
                 ░░███████░░░░░░████████░░░░░░░░░
                 ░░▀▀█████░░░░░░░▀▀████▀░░░░░░░░░
-               ASDO Man Version 2.1 Panda Distro 
+                ASDO Man Version 3 Panda Distro 
             Author: Ben McGuffog, Technical Engineer
 
         """)

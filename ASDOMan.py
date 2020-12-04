@@ -134,7 +134,7 @@ class IPMan:
                     self.lineFilter(logFile, True)
                 else:
                     self.lineFilter(logFile, False)
-        except Exception:
+        except OSError:
             print("something went terribly wrong")
             pass
 
@@ -231,9 +231,13 @@ class IPMan:
         :param logString:
         :return none:
         """
-        f = open("ASDOMan_logfile.txt", "a")
-        f.write(str(datetime.datetime.utcnow().strftime("%b%d-%H:%M:%S.%f")[:-4]) + " " + logString + "\n")
-        f.close()
+        try:
+            f = open("ASDOMan_logfile.txt", "a")
+            f.write(str(datetime.datetime.utcnow().strftime("%b%d-%H:%M:%S.%f")[:-4]) + " " + logString + "\n")
+            f.close()
+        except OSError:
+            print("Failed to write to ASDOMan_logfile.txt")
+            pass
 
     @staticmethod
     def progress(filename, size, sent):

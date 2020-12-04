@@ -73,7 +73,7 @@ class IPMan:
             "15110": "10.128.74.2",
         }
 
-    def getCPG(self, coach):
+    def getCPGAddress(self, coach):
         """
         Returns the CPG dictionary item for the argument coach.
         Will default to home 127.0.0.1 for case None.
@@ -86,7 +86,7 @@ class IPMan:
 
         return self.cpgdict.get(coach)
 
-    def getCPS(self, coach):
+    def getCPSAddress(self, coach):
         """
         Returns the CPS dictionary item for the argument coach.
         Will default to home 127.0.0.1 for case None.
@@ -109,11 +109,13 @@ class IPMan:
         global path
         username = 'root'
         password = 'root'
-        host = self.getCPS(coach)
+        host = self.getCPSAddress(coach)
         port = 22
         client = SSHClient()
         client.load_system_host_keys()
         client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+
+        # Attempt a scp connection to the host and get the logs for coach
         try:
             client.connect(host, port, username, password)
             self.makeLogDir(coach)
@@ -140,7 +142,7 @@ class IPMan:
 
     def getRake(self, coaches):
         """
-        Grabs the logs for an entire coach rake by iterating through a list of coaches.
+        Iterates through a list of coaches and calls the getLogs for each.
         :param coaches:
         :return none:
         """
@@ -166,9 +168,9 @@ class IPMan:
      
         """)
         for coach in tqdm(self.cpsdict.keys()):
-            if self.isCoachReachable(coach, self.getCPS(coach)):
+            if self.isCoachReachable(coach, self.getCPSAddress(coach)):
                 coaches.append(coach)
-                IPMan.writeToLogfile("Downloaded: " + str(coach) + " at: " + str(self.getCPS(coach)))
+                IPMan.writeToLogfile("Downloaded: " + str(coach) + " at: " + str(self.getCPSAddress(coach)))
 
     def lineFilter(self, file, compressed):
         """

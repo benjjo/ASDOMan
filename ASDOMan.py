@@ -178,16 +178,20 @@ class IPMan:
         fileLocation = (path + '/' + file)
         errorLog = (path + '/' + 'filtered_log.txt')
         logfile = open(errorLog, 'a')
+
+        # Setup the open protocol
         if compressed:
-            with gzip.open(fileLocation, 'rt') as log:
-                for line in log:
-                    if 'error' in line or 'PTI' in line:
-                        logfile.write(line)
+            openIt = gzip.open
         else:
-            with open(fileLocation, 'rt') as log:
-                for line in log:
-                    if 'error' in line or 'PTI' in line:
+            openIt = open
+
+        with openIt(fileLocation, 'rt') as log:
+            for line in log:
+                if 'error' in line or 'PTI' in line:
+                    try:
                         logfile.write(line)
+                    except OSError:
+                        print("Failed to write to: " + errorLog)
         logfile.close()
     
     @staticmethod

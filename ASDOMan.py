@@ -13,13 +13,13 @@ path = ''
 coachList = []
 
 
-class IPMan:
+class DownloadManager:
     """
-    Class IPMan is our ancient hero who downloads the ASDO logs for the list of coaches sent to it.
-    Using mad python Kung Fu style object programming, together we can overcome the horror that is ASDO!
+    Class DownloadManager is our ancient hero who downloads remote log files from the list of "coaches" sent to it.
+    Using mad python Kung Fu style object programming, together we can overcome the laborious task of log downloads!
 
     Author:     Ben McGuffog, Technical Engineer
-    Version:    2020-Oct
+    Version:    2020-Dec
 
     """
 
@@ -73,6 +73,14 @@ class IPMan:
             "15110": "10.128.74.2",
         }
 
+        self.HMIdict = {
+            # SEATED
+            "15001": "10.128.33.2", "15002": "10.128.34.2", "15003": "10.128.35.2",
+            "15004": "10.128.36.2", "15005": "10.128.37.2", "15006": "10.128.38.2",
+            "15007": "10.128.39.2", "15008": "10.128.40.2", "15009": "10.128.41.2",
+            "15010": "10.128.42.2", "15011": "10.128.43.2",
+        }
+
     def getCPGAddress(self, coach):
         """
         Returns the CPG dictionary item for the argument coach.
@@ -99,17 +107,31 @@ class IPMan:
 
         return self.cpsdict.get(coach)
 
-    def getLogs(self, coach):
+    def getHMIAddress(self, coach):
         """
-        Automatically downloads the log files from the remote /var/opt/logs folder.
-        Utilises the ssh port 22 protocols.
+        Returns the CPS dictionary item for the argument coach.
+        Will default to home 127.0.0.1 for case None.
+        Will cast int arguments to strings.
         :param coach:
+        :return self.cpsdict.get(coach):
+        """
+        if type(coach) is int:
+            coach = str(coach)
+
+        return self.HMIdict.get(coach)
+
+    def getLogs(self, coach, remotePath, username, password, host):
+        """
+        Automatically downloads the log files from the remotePath folder.
+        Utilises the ssh port 22 protocols.
+        :param host: Host IP address
+        :param password: Password for the remote host
+        :param username: Username for the remote host
+        :param remotePath: Path for the remote logs
+        :param coach: The coach key for the dictionary lookup
         :return none:
         """
         global path
-        username = 'root'
-        password = 'root'
-        host = self.getCPSAddress(coach)
         port = 22
         client = SSHClient()
         client.load_system_host_keys()
@@ -121,13 +143,14 @@ class IPMan:
             self.makeLogDir(coach)
             # This is a little bit of a hack. SCPClient doesn't allow you to pass a wild
             # character to the string, it just sees it as a literal character.
-            # Sanitize gets around this with lambda magic.
-            with SCPClient(client.get_transport(), sanitize=lambda x: x, progress=IPMan.progress) as scp:
-                scp.get('/var/opt/logs/ASDO*', path)
+            # Sanitize gets around this with lambda magic. Not sure why it needs Lambda to return the same variable.
+            # https://stackoverflow.com/questions/47926123/using-wildcards-in-file-names-using-pythons-scpclient-library
+            with SCPClient(client.get_transport(), sanitize=lambda x: x, progress=DownloadManager.progress) as scp:
+                scp.get(remotePath, path)
             scp.close()
         except paramiko.ssh_exception.NoValidConnectionsError:
             print("Failed connection to " + str(coach))
-            IPMan.writeToLogfile("Failed connection to " + str(coach))
+            DownloadManager.writeToLogfile("Failed connection to " + str(coach))
 
         # Filter out the error logs by calling lineFilter
         try:
@@ -140,19 +163,22 @@ class IPMan:
             print("something went terribly wrong")
             pass
 
-    def getRake(self, coaches):
+    def getRake(self, coaches, remoteDir, username, password):
         """
         Iterates through a list of coaches and calls the getLogs for each.
-        :param coaches:
+        :param password: The password for the remote host
+        :param username: The username for the remote host
+        :param remoteDir: The directory of the remote host logs
+        :param coaches: The list of coaches to download from
         :return none:
         """
         for coach in coaches:
-            self.getLogs(coach)
+            self.getLogs(coach, remoteDir, username, password, host=self.getCPSAddress(coach))
 
     def makeCoachList(self, coaches):
         """
         Creates a list of coaches from the CPS list that are currently reachable.
-        :param coaches:
+        :param coaches: The list of coaches to iterate through
         :return none:
         """
         coaches.clear()
@@ -170,7 +196,7 @@ class IPMan:
         for coach in tqdm(self.cpsdict.keys()):
             if self.isCoachReachable(coach, self.getCPSAddress(coach)):
                 coaches.append(coach)
-                IPMan.writeToLogfile("Downloaded: " + str(coach) + " at: " + str(self.getCPSAddress(coach)))
+                DownloadManager.writeToLogfile("Downloaded: " + str(coach) + " at: " + str(self.getCPSAddress(coach)))
 
     def lineFilter(self, file, compressed):
         """
@@ -210,10 +236,10 @@ class IPMan:
             os.makedirs(path, exist_ok=True)
         except OSError:
             print('Creation of the directory %s has failed' % path)
-            IPMan.writeToLogfile('Creation of the directory %s has failed' % path)
+            DownloadManager.writeToLogfile('Creation of the directory %s has failed' % path)
         else:
             print('Successfully uploaded logs to %s ' % path)
-            IPMan.writeToLogfile('Successfully uploaded logs to %s ' % path)
+            DownloadManager.writeToLogfile('Successfully uploaded logs to %s ' % path)
 
     @staticmethod
     def isCoachReachable(coachNumber, coachIP):
@@ -225,9 +251,9 @@ class IPMan:
         """
         response = not subprocess.call('ping -n 1 -w 100 ' + str(coachIP), stdout=subprocess.PIPE)
         if response:
-            IPMan.writeToLogfile(str(coachNumber) + " contact confirmed at " + str(coachIP))
+            DownloadManager.writeToLogfile(str(coachNumber) + " contact confirmed at " + str(coachIP))
         else:
-            IPMan.writeToLogfile(str(coachNumber) + " unreachable at " + str(coachIP))
+            DownloadManager.writeToLogfile(str(coachNumber) + " unreachable at " + str(coachIP))
         return response
 
     @staticmethod
@@ -265,11 +291,11 @@ def main():
     :return:
     """
     global coachList
-    getRakeLogs = IPMan()
+    getRakeLogs = DownloadManager()
     getRakeLogs.makeCoachList(coachList)
     if coachList:
         print('Search complete. Found: ' + ', '.join(coachList))
-        getRakeLogs.getRake(coachList)
+        getRakeLogs.getRake(coachList, remoteDir='/var/opt/logs/ASDO*', username='root', password='root')
         print("""
         
         
@@ -295,7 +321,7 @@ def main():
                 ░░█████████▄▄▄▄███████░░░░░░░░░░
                 ░░███████░░░░░░████████░░░░░░░░░
                 ░░▀▀█████░░░░░░░▀▀████▀░░░░░░░░░
-                ASDO Man Version 3 Panda Distro 
+                ASDO Man Version 3.1 Panda Distro 
             Author: Ben McGuffog, Technical Engineer
 
         """)
@@ -335,7 +361,7 @@ def main():
         
         """)
 
-    input("Press any key to exit")
+    input("Press Enter key to exit")
 
 
 if __name__ == "__main__":

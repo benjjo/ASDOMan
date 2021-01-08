@@ -197,6 +197,7 @@ class DownloadManager:
             if self.isCoachReachable(coach, self.getCPSAddress(coach)):
                 coaches.append(coach)
                 DownloadManager.writeToLogfile("Downloaded: " + str(coach) + " at: " + str(self.getCPSAddress(coach)))
+        os.system('cls')
 
     def lineFilter(self, file, compressed):
         """
@@ -321,8 +322,8 @@ def main():
                 ░░█████████▄▄▄▄███████░░░░░░░░░░
                 ░░███████░░░░░░████████░░░░░░░░░
                 ░░▀▀█████░░░░░░░▀▀████▀░░░░░░░░░
-                ASDO Man Version 3.1 Panda Distro 
-            Author: Ben McGuffog, Technical Engineer
+                ASDO Man Version 3.2 Panda Distro 
+            Author: Ben McGuffog, Support Engineer
 
         """)
         print('****** Logs gathered for: ' + ', '.join(coachList))

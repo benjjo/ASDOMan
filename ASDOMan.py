@@ -9,14 +9,11 @@ from tqdm import tqdm
 import subprocess
 import gzip
 
-path = ''
-coachList = []
-
 
 class DownloadManager:
     """
     Class DownloadManager is our ancient hero who downloads remote log files from the list of "coaches" sent to it.
-    Using mad python Kung Fu style object programming, together we can overcome the laborious task of log downloads!
+    Using mad python KungFu style object programming, together we can overcome the laborious task of log downloads!
 
     Author:     Ben McGuffog, Support Engineer
     Version:    2021-Jan
@@ -83,6 +80,8 @@ class DownloadManager:
 
         self.CPGKeyList = self.cpgdict.keys()
         self.localCPGList = list()
+        self.path = str()
+        self.viableCoachList = list()
 
     def getCPGAddress(self, coach):
         """
@@ -117,7 +116,6 @@ class DownloadManager:
         """
         if type(coach) is int:
             coach = str(coach)
-
         return self.HMIdict.get(coach)
 
     def getCPGList(self):
@@ -126,6 +124,20 @@ class DownloadManager:
         :return self.CPGKeyList:
         """
         return self.CPGKeyList
+
+    def getViableCoachList(self):
+        """
+        Getter for viableCoachList
+        :return self.viableCoachList:
+        """
+        return self.viableCoachList
+
+    def getPath(self):
+        """
+        Getter for path
+        :return self.path:
+        """
+        return self.path
 
     def getLocalCPGList(self):
         """
@@ -141,6 +153,27 @@ class DownloadManager:
         """
         self.localCPGList = list([x for x in newList if x in self.getCPGList()])
 
+    def setPath(self, localPath):
+        """
+        Sets the list variable self.localCPGList to a list of seated and
+        club coaches that are currently on the local network.
+        """
+        self.path = str(localPath)
+
+    def clearViableCoachList(self):
+        """
+        Setter for the viableCoachList
+        :return:
+        """
+        self.getViableCoachList().clear()
+
+    def setViableCoachList(self, newCoach):
+        """
+        Setter for the viableCoachList
+        :return:
+        """
+        self.getViableCoachList().append(newCoach)
+
     def getRemoteLogs(self, coach, remotePath, username, password, host):
         """
         Automatically downloads the log files from the remotePath folder.
@@ -152,7 +185,7 @@ class DownloadManager:
         :param coach: The coach key for the dictionary lookup
         :return none:
         """
-        global path
+        # global path
         port = 22
         client = SSHClient()
         client.load_system_host_keys()
@@ -167,7 +200,7 @@ class DownloadManager:
             # Sanitize gets around this with lambda magic. Not sure why it needs Lambda to return the same variable.
             # https://stackoverflow.com/questions/47926123/using-wildcards-in-file-names-using-pythons-scpclient-library
             with SCPClient(client.get_transport(), sanitize=lambda x: x, progress=DownloadManager.progress) as scp:
-                scp.get(remotePath, path)
+                scp.get(remotePath, self.getPath())
             scp.close()
         except paramiko.ssh_exception.NoValidConnectionsError:
             print("Failed connection to " + str(coach))
@@ -175,7 +208,7 @@ class DownloadManager:
 
         # Filter out the error logs by calling lineFilter
         try:
-            for logFile in os.listdir(path):
+            for logFile in os.listdir(self.getPath()):
                 if logFile.endswith('gz'):
                     self.lineFilter(logFile, True)
                 else:
@@ -184,25 +217,29 @@ class DownloadManager:
             print("something went terribly wrong")
             pass
 
-    def getRake(self, coaches, remoteDir, username, password):
+    def getRake(self, coaches, remoteDir, username, password, CPS):
         """
         Iterates through a list of coaches and calls the getLogs for each.
         :param password: The password for the remote host
         :param username: The username for the remote host
         :param remoteDir: The directory of the remote host logs
         :param coaches: The list of coaches to download from
+        :param CPS: uses CPS list when true, else CPG list
         :return none:
         """
         for coach in coaches:
-            self.getRemoteLogs(coach, remoteDir, username, password, host=self.getCPSAddress(coach))
+            if CPS:
+                self.getRemoteLogs(coach, remoteDir, username, password, host=self.getCPSAddress(coach))
+            else:
+                self.getRemoteLogs(coach, remoteDir, username, password, host=self.getCPGAddress(coach))
 
-    def makeCoachList(self, coaches):
+    def makeCoachList(self):
         """
         Creates a list of coaches from the CPS list that are currently reachable.
-        :param coaches: The list of coaches to iterate through
         :return none:
         """
-        coaches.clear()
+        self.clearViableCoachList()
+
         print("""
         
         ________                _____                                 _____ _____ _____                  
@@ -216,22 +253,24 @@ class DownloadManager:
         """)
         for coach in tqdm(self.cpsdict.keys()):
             if self.isCoachReachable(coach, self.getCPSAddress(coach)):
-                coaches.append(coach)
+                self.setViableCoachList(coach)
                 DownloadManager.writeToLogfile("Downloaded: " + str(coach) + " at: " + str(self.getCPSAddress(coach)))
         os.system('cls')
 
     def downloadHelper(self):
-        self.getRake(coachList, remoteDir='/var/opt/logs/ASDO*', username='root', password='root')
-        self.setLocalCPGList(coachList)
-        self.getRake(self.getLocalCPGList(), remoteDir='/var/opt/asdo_hmi/log/*', username='root', password='root')
+        self.getRake(self.getViableCoachList(), remoteDir='/var/opt/logs/ASDO*', username='root',
+                     password='root', CPS=True)
+        self.setLocalCPGList(self.getViableCoachList())
+        self.getRake(self.getLocalCPGList(), remoteDir='/var/opt/asdo_hmi/log/*', username='root',
+                     password='root', CPS=False)
 
     def lineFilter(self, file, compressed):
         """
         Grabs a file and depending on whether or not its gzipped, will filter through
         and pullout all of the PTI and error lines.
         """
-        fileLocation = (path + '/' + file)
-        errorLog = (path + '/' + 'filtered_log.txt')
+        fileLocation = (self.getPath() + '/' + file)
+        errorLog = (self.getPath() + '/' + 'filtered_log.txt')
         logfile = open(errorLog, 'a')
 
         # Setup the open protocol
@@ -248,25 +287,23 @@ class DownloadManager:
                     except OSError:
                         print("Failed to write to: " + errorLog)
         logfile.close()
-    
-    @staticmethod
-    def makeLogDir(coach):
+
+    def makeLogDir(self, coach):
         """
         Attempts to make a directory for the current download session.
         Returns the new folder as a string is successful, else returns None.
         :param coach:
         :return none:
         """
-        global path
-        path = 'logs/' + str(coach) + '/' + str(time.strftime('%Y%m%d', time.localtime()))
+        self.setPath('logs/' + str(coach) + '/' + str(time.strftime('%Y%m%d', time.localtime())))
         try:
-            os.makedirs(path, exist_ok=True)
+            os.makedirs(self.getPath(), exist_ok=True)
         except OSError:
-            print('Creation of the directory %s has failed' % path)
-            DownloadManager.writeToLogfile('Creation of the directory %s has failed' % path)
+            print('Creation of the directory %s has failed' % self.getPath())
+            DownloadManager.writeToLogfile('Creation of the directory %s has failed' % self.getPath())
         else:
-            print('Successfully uploaded logs to %s ' % path)
-            DownloadManager.writeToLogfile('Successfully uploaded logs to %s ' % path)
+            print('Successfully uploaded logs to %s ' % self.getPath())
+            DownloadManager.writeToLogfile('Successfully uploaded logs to %s ' % self.getPath())
 
     @staticmethod
     def isCoachReachable(coachNumber, coachIP):
@@ -318,11 +355,10 @@ def main():
     :return:
     """
 
-    global coachList
     getRakeLogs = DownloadManager()
-    getRakeLogs.makeCoachList(coachList)
-    if coachList:
-        print('Search complete. Found: ' + ', '.join(coachList))
+    getRakeLogs.makeCoachList()
+    if getRakeLogs.getViableCoachList():
+        print('Search complete. Found: ' + ', '.join(getRakeLogs.getViableCoachList()))
         print("""
         ________                           ______               ______________
         ___  __ \______ ___      _________ ___  /______ ______ _______  /___(_)_______ _______ _
@@ -361,11 +397,11 @@ def main():
                 ░░█████████▄▄▄▄███████░░░░░░░░░░
                 ░░███████░░░░░░████████░░░░░░░░░
                 ░░▀▀█████░░░░░░░▀▀████▀░░░░░░░░░
-                ASDO Man Version 4.0 Panda Distro 
+                ASDO Man Version 4.1 Panda Distro 
             Author: Ben McGuffog, Support Engineer
 
         """)
-        print('****** Logs gathered for: ' + ', '.join(coachList))
+        print('****** Logs gathered for: ' + ', '.join(getRakeLogs.getViableCoachList()))
     else:
         print("""
         

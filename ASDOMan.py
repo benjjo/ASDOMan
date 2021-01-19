@@ -18,8 +18,8 @@ class DownloadManager:
     Class DownloadManager is our ancient hero who downloads remote log files from the list of "coaches" sent to it.
     Using mad python Kung Fu style object programming, together we can overcome the laborious task of log downloads!
 
-    Author:     Ben McGuffog, Technical Engineer
-    Version:    2020-Dec
+    Author:     Ben McGuffog, Support Engineer
+    Version:    2021-Jan
 
     """
 
@@ -81,10 +81,12 @@ class DownloadManager:
             "15010": "10.128.42.2", "15011": "10.128.43.2",
         }
 
+        self.CPGKeyList = self.cpgdict.keys()
+        self.localCPGList = list()
+
     def getCPGAddress(self, coach):
         """
         Returns the CPG dictionary item for the argument coach.
-        Will default to home 127.0.0.1 for case None.
         Will cast int arguments to strings.
         :param coach:
         :return self.cpgdict.get(coach):
@@ -97,7 +99,6 @@ class DownloadManager:
     def getCPSAddress(self, coach):
         """
         Returns the CPS dictionary item for the argument coach.
-        Will default to home 127.0.0.1 for case None.
         Will cast int arguments to strings.
         :param coach:
         :return self.cpsdict.get(coach):
@@ -109,18 +110,38 @@ class DownloadManager:
 
     def getHMIAddress(self, coach):
         """
-        Returns the CPS dictionary item for the argument coach.
-        Will default to home 127.0.0.1 for case None.
+        Returns the CPG dictionary item for the argument coach.
         Will cast int arguments to strings.
         :param coach:
-        :return self.cpsdict.get(coach):
+        :return self.HMIdict.get(coach):
         """
         if type(coach) is int:
             coach = str(coach)
 
         return self.HMIdict.get(coach)
 
-    def getLogs(self, coach, remotePath, username, password, host):
+    def getCPGList(self):
+        """
+        Getter for CPGKeyList
+        :return self.CPGKeyList:
+        """
+        return self.CPGKeyList
+
+    def getLocalCPGList(self):
+        """
+        Getter for localCPGList
+        :return self.localCPGList:
+        """
+        return self.localCPGList
+
+    def setLocalCPGList(self, newList):
+        """
+        Sets the list variable self.localCPGList to a list of seated and
+        club coaches that are currently on the local network.
+        """
+        self.localCPGList = list([x for x in newList if x in self.getCPGList()])
+
+    def getRemoteLogs(self, coach, remotePath, username, password, host):
         """
         Automatically downloads the log files from the remotePath folder.
         Utilises the ssh port 22 protocols.
@@ -173,7 +194,7 @@ class DownloadManager:
         :return none:
         """
         for coach in coaches:
-            self.getLogs(coach, remoteDir, username, password, host=self.getCPSAddress(coach))
+            self.getRemoteLogs(coach, remoteDir, username, password, host=self.getCPSAddress(coach))
 
     def makeCoachList(self, coaches):
         """
@@ -198,6 +219,11 @@ class DownloadManager:
                 coaches.append(coach)
                 DownloadManager.writeToLogfile("Downloaded: " + str(coach) + " at: " + str(self.getCPSAddress(coach)))
         os.system('cls')
+
+    def downloadHelper(self):
+        self.getRake(coachList, remoteDir='/var/opt/logs/ASDO*', username='root', password='root')
+        self.setLocalCPGList(coachList)
+        self.getRake(self.getLocalCPGList(), remoteDir='/var/opt/asdo_hmi/log/*', username='root', password='root')
 
     def lineFilter(self, file, compressed):
         """
@@ -286,17 +312,30 @@ class DownloadManager:
 
 def main():
     """
-    Instantiates a class object of type IPMan and makes a list of ping-able coaches.
+    Instantiates a class object of type DownloadManager and makes a list of ping-able coaches.
     Using this list, each coach is then sent an SCP protocol to download the logs from the
     root@COACH_IP_ADDRESS:/var/opt/logs folder and save them to the local machine.
     :return:
     """
+
     global coachList
     getRakeLogs = DownloadManager()
     getRakeLogs.makeCoachList(coachList)
     if coachList:
         print('Search complete. Found: ' + ', '.join(coachList))
-        getRakeLogs.getRake(coachList, remoteDir='/var/opt/logs/ASDO*', username='root', password='root')
+        print("""
+        ________                           ______               ______________
+        ___  __ \______ ___      _________ ___  /______ ______ _______  /___(_)_______ _______ _
+        __  / / /_  __ \__ | /| / /__  __ \__  / _  __ \_  __ `/_  __  / __  / __  __ \__  __ `/
+        _  /_/ / / /_/ /__ |/ |/ / _  / / /_  /  / /_/ // /_/ / / /_/ /  _  /  _  / / /_  /_/ /
+        /_____/  \____/ ____/|__/  /_/ /_/ /_/   \____/ \__,_/  \__,_/   /_/   /_/ /_/ _\__, /
+                                                                                       /____/
+
+
+        """)
+
+        getRakeLogs.downloadHelper()
+
         print("""
         
         
@@ -322,7 +361,7 @@ def main():
                 ░░█████████▄▄▄▄███████░░░░░░░░░░
                 ░░███████░░░░░░████████░░░░░░░░░
                 ░░▀▀█████░░░░░░░▀▀████▀░░░░░░░░░
-                ASDO Man Version 3.2 Panda Distro 
+                ASDO Man Version 4.0 Panda Distro 
             Author: Ben McGuffog, Support Engineer
 
         """)

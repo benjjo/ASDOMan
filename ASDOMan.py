@@ -174,7 +174,7 @@ class DownloadManager:
         """
         self.getViableCoachList().append(newCoach)
 
-    def getRemoteLogs(self, coach, remotePath, username, password, host):
+    def getRemoteLogs(self, coach, remotePath, username, password, host, CPS=True):
         """
         Automatically downloads the log files from the remotePath folder.
         Utilises the ssh port 22 protocols.
@@ -207,15 +207,16 @@ class DownloadManager:
             DownloadManager.writeToLogfile("Failed connection to " + str(coach))
 
         # Filter out the error logs by calling lineFilter
-        try:
-            for logFile in os.listdir(self.getPath()):
-                if logFile.endswith('gz'):
-                    self.lineFilter(logFile, True)
-                else:
-                    self.lineFilter(logFile, False)
-        except OSError:
-            print("something went terribly wrong")
-            pass
+        if CPS:
+            try:
+                for logFile in os.listdir(self.getPath()):
+                    if logFile.endswith('gz'):
+                        self.lineFilter(logFile, True)
+                    else:
+                        self.lineFilter(logFile, False)
+            except OSError:
+                print("something went terribly wrong")
+                pass
 
     def getRake(self, coaches, remoteDir, username, password, CPS):
         """
@@ -229,9 +230,10 @@ class DownloadManager:
         """
         for coach in coaches:
             if CPS:
-                self.getRemoteLogs(coach, remoteDir, username, password, host=self.getCPSAddress(coach))
+                self.getRemoteLogs(coach, remoteDir, username, password, host=self.getCPSAddress(coach), CPS=True)
             else:
-                self.getRemoteLogs(coach, remoteDir, username, password, host=self.getCPGAddress(coach))
+                print(self.getCPGAddress(coach))
+                self.getRemoteLogs(coach, remoteDir, username, password, host=self.getCPGAddress(coach), CPS=False)
 
     def makeCoachList(self):
         """
@@ -261,7 +263,7 @@ class DownloadManager:
         self.getRake(self.getViableCoachList(), remoteDir='/var/opt/logs/ASDO*', username='root',
                      password='root', CPS=True)
         self.setLocalCPGList(self.getViableCoachList())
-        self.getRake(self.getLocalCPGList(), remoteDir='/var/opt/asdo_hmi/log/*', username='root',
+        self.getRake(self.getLocalCPGList(), remoteDir='/var/opt/asdo_hmi/log/asdo_hmi*', username='root',
                      password='root', CPS=False)
 
     def lineFilter(self, file, compressed):
@@ -397,7 +399,7 @@ def main():
                 ░░█████████▄▄▄▄███████░░░░░░░░░░
                 ░░███████░░░░░░████████░░░░░░░░░
                 ░░▀▀█████░░░░░░░▀▀████▀░░░░░░░░░
-                ASDO Man Version 4.1 Panda Distro 
+               ASDO Man Version 4.0b Panda Distro 
             Author: Ben McGuffog, Support Engineer
 
         """)

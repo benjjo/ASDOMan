@@ -178,14 +178,14 @@ class DownloadManager:
         """
         Automatically downloads the log files from the remotePath folder.
         Utilises the ssh port 22 protocols.
-        :param host: Host IP address
-        :param password: Password for the remote host
-        :param username: Username for the remote host
-        :param remotePath: Path for the remote logs
         :param coach: The coach key for the dictionary lookup
-        :return none:
+        :param remotePath: Path for the remote logs
+        :param username: Username for the remote host
+        :param password: Password for the remote host
+        :param host: Host IP address
+        :param CPS: Defaults to True. Set to False for CPG downloads.
+        :return: None
         """
-        # global path
         port = 22
         client = SSHClient()
         client.load_system_host_keys()
